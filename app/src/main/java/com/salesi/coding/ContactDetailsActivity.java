@@ -65,7 +65,7 @@ public class ContactDetailsActivity extends AppCompatActivity {
     protected LinearLayout users_similar_hobbies;
 
 
-    private int contactId;
+    private int contactPosition;
     private List<ContactEntity> contacts;
     ContactEntity contactDetails;
 
@@ -79,7 +79,7 @@ public class ContactDetailsActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         Intent intent = getIntent();
-        contactId = Integer.parseInt(intent.getStringExtra("contactPosition"));
+        contactPosition = Integer.parseInt(intent.getStringExtra("contactPosition"));
         //Log.d("contactId", contactId);
 
         showContactDetails();
@@ -88,7 +88,7 @@ public class ContactDetailsActivity extends AppCompatActivity {
 
     private void showContactDetails() {
         contacts = mContactService.get().fetchContacts();
-        contactDetails = contacts.get(contactId);
+        contactDetails = contacts.get(contactPosition);
 
         contact_id.setText(contactDetails.ContactID.toString());
         title.setText(contactDetails.Title);
@@ -114,40 +114,19 @@ public class ContactDetailsActivity extends AppCompatActivity {
     }
 
     private void showContactsWithSimilarHobbies() {
-        ArrayList<ContactEntity> similarContacts = new ArrayList<ContactEntity>();
+        List<ContactEntity> similarContacts = mContactService.get().getContactsWithSimilarHobbies(contactPosition);
         ContactEntity contact;
 
-        for (int i = 0; i < contacts.size(); i++) {
-            contact = contacts.get(i);
-            boolean similarHobby = false;
-            if (contact != contactDetails) {
-                if (contact.Hobbies != null && !similarHobby) {
-                    for (int ii = 0; ii < contact.Hobbies.size(); ii++) {
-                        for (int k = 0; k < contactDetails.Hobbies.size(); k++) {
-                            // Log.d("similarContacts", contact.Hobbies.get(ii).toLowerCase() + "/" + contactDetails.Hobbies.get(k).toLowerCase() );
-                            if (contact.Hobbies.get(ii).toLowerCase().equals(contactDetails.Hobbies.get(k).toLowerCase())) {
-                                contact.position = i;
-                                similarContacts.add(contact);
-                                similarHobby = true;
-                                break;
-                            }
-                        }
-                        if(similarHobby)
-                            break;
-                    }
-                }
-            }
-        }
 
-        LinearLayout.LayoutParams lparams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        lparams.setMargins(0, 20, 0, 0);
+        LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lParams.setMargins(0, 20, 0, 0);
 
         //Log.d("similarContacts", String.valueOf(similarContacts.size()));
         for (int kk = 0; kk < similarContacts.size(); kk++) {
             TextView tv = new TextView(this);
-            tv.setLayoutParams(lparams);
+            tv.setLayoutParams(lParams);
             contact = similarContacts.get(kk);
-            tv.setTag(contact.position);
+            tv.setTag(contacts.indexOf(contact));
             tv.setText(contact.FirstNane + contact.LastName);
             users_similar_hobbies.addView(tv);
 
